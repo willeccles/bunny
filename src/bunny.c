@@ -16,11 +16,20 @@
 
 #include <linux/reboot.h>
 
-#define DEF_HOSTNAME "linux"
+#define DEFAULT_HOSTNAME "linux"
+
+// - /etc/bunny/1 comes after mounting and should do more mounts
+// - /etc/bunny/2 comes after seeding random and should init devices and run
+//   things found in /etc/bunny.d
+// - /etc/bunny/3 starts login prompts on ttys as necessary
+// - /etc/bunny/shutdown does things that should happen immediately before
+//   shutdown
 
 static void mount_filesystems();
 static void init_hostname();
+static void init_urandom();
 static void shutdown(bool should_reboot);
+static void copy_contents(const char* src, const char* dst);
 static void run(const char* path);
 
 static void signal_pid1(int sig);
@@ -49,19 +58,22 @@ int main(int arc, char** argv) {
 
   mount_filesystems();
 
-  // TODO do filesystem things the user needs
-  // this should be done in a user-provided script or something
+  // do filesystem things
+  run("/etc/bunny/1");
 
   init_hostname();
 
   // TODO seed random by writing to /dev/urandom from a file which should
   // probably be set from /dev/random on shutdown?
 
+  // do device/boot things
+  run("/etc/bunny/2");
+
   // cause control-alt-delete to send SIGINT to PID 1
   reboot(LINUX_REBOOT_CMD_CAD_OFF);
 
-  // TODO (a)getty (or not? may not want a tty, but we could execute some user
-  // script or something, then just live forever, not sure yet)
+  // start ttys
+  run("/etc/bunny/3");
 
   // if we have done a tty or something to block above, we should not be able to
   // get here, and if we do we should try to execute a shell
@@ -74,7 +86,6 @@ int main(int arc, char** argv) {
 }
 
 static void mount_filesystems() {
-  // TODO error handling
   mount("proc", "/proc", "proc", MS_NOEXEC | MS_NOSUID | MS_NODEV, NULL);
   mount("sys", "/sys", "sysfs", MS_NOEXEC | MS_NOSUID | MS_NODEV, NULL);
   mount("run", "/run", "tmpfs", MS_NOSUID | MS_NODEV, "mode=0755");
@@ -88,14 +99,14 @@ static void init_hostname() {
   int fd = open("/etc/hostname", O_RDONLY);
   if (fd < 0 || fstat(fd, &st) < 0) {
     close(fd);
-    hostname = DEF_HOSTNAME;
+    hostname = DEFAULT_HOSTNAME;
   }
 
   if (hostname == NULL) {
     hostname = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
     if (hostname == MAP_FAILED) {
-      hostname = DEF_HOSTNAME;
+      hostname = DEFAULT_HOSTNAME;
     }
   }
 
@@ -108,11 +119,12 @@ static void init_hostname() {
   munmap(hostname, st.st_size);
 }
 
+static void init_urandom() {
+}
+
 static void shutdown(bool should_reboot) {
-  // TODO run user script or whatever here
-
+  run("/etc/bunny/shutdown");
   sync();
-
   reboot(should_reboot ? LINUX_REBOOT_CMD_RESTART : LINUX_REBOOT_CMD_POWER_OFF);
 }
 
@@ -121,6 +133,9 @@ static void signal_pid1(int sig) {
     perror("failed to send signal to init");
     exit(EXIT_FAILURE);
   }
+}
+
+static void copy_contents(const char* src, const char* dst) {
 }
 
 static void run(const char* path) {
