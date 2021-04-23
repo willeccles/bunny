@@ -27,9 +27,8 @@
 
 static void mount_filesystems();
 static void init_hostname();
-static void init_urandom();
+static void seed_urandom();
 static void shutdown(bool should_reboot);
-static void copy_contents(const char* src, const char* dst);
 static void run(const char* path);
 
 static void signal_pid1(int sig);
@@ -63,8 +62,7 @@ int main(int arc, char** argv) {
 
   init_hostname();
 
-  // TODO seed random by writing to /dev/urandom from a file which should
-  // probably be set from /dev/random on shutdown?
+  seed_urandom();
 
   // do device/boot things
   run("/etc/bunny/2");
@@ -119,7 +117,30 @@ static void init_hostname() {
   munmap(hostname, st.st_size);
 }
 
-static void init_urandom() {
+static void seed_urandom() {
+  struct stat st = {0};
+  int fd = open("/var/bunny/random-seed", O_RDONLY);
+  if (fd < 0) {
+    return;
+  }
+
+  if (fstat(fd, &st) < 0) {
+    close(fd);
+    return;
+  }
+
+  char* data = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  close(fd);
+
+  if (data != MAP_FAILED) {
+    fd = open("/dev/urandom", O_WRONLY);
+    if (fd != 0) {
+      write(fd, data, st.st_size);
+      close(fd);
+    }
+
+    munmap(data, st.st_size);
+  }
 }
 
 static void shutdown(bool should_reboot) {
@@ -133,9 +154,6 @@ static void signal_pid1(int sig) {
     perror("failed to send signal to init");
     exit(EXIT_FAILURE);
   }
-}
-
-static void copy_contents(const char* src, const char* dst) {
 }
 
 static void run(const char* path) {
