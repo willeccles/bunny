@@ -1,9 +1,13 @@
-# Bunny
+                                 /_    _  _
+                                /_//_// // //_/
+                                            _/
 
-Bunny is a minimal and easily-customized Linux init system (PID 1) tailored
-towards small/embedded systems.
+  Bunny is a minimal and easily-customized Linux init system (PID 1) tailored
+                        towards small/embedded systems.
 
-## Building
+
+Building
+========
 
 You'll need a C99 compiler for your chosen target architecture. Simply run
 `make'. If you are cross-compiling, you should set the $CC environment variable
@@ -11,7 +15,9 @@ when building to your chosen compiler:
 
   CC=arm-linux-gnueabihf-gcc make
 
-## Installing
+
+Installing
+==========
 
 For a default installation, run `make install'. The binary will be placed in
 /usr/sbin. `reboot' and `shutdown' will be placed in /usr/sbin as symlinks to
@@ -25,7 +31,9 @@ variable:
 
   make install DESTDIR=/media/rootfs
 
-## Stages
+
+Stages
+======
 
 Bunny has 4 main stages:
   1. Mount filesystems
@@ -54,7 +62,9 @@ If anything goes wrong during the boot process, bunny will attempt to run
 a shell (/bin/sh). After the shell exits, bunny will simply reboot the system
 and try again.
 
-## Controlling Bunny
+
+Controlling Bunny
+=================
 
 SIGINT and Control-Alt-Delete will trigger a system restart. SIGTERM will shut
 down the system.
