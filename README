@@ -1,0 +1,65 @@
+# Bunny
+
+Bunny is a minimal and easily-customized Linux init system (PID 1) tailored
+towards small/embedded systems.
+
+## Building
+
+You'll need a C99 compiler for your chosen target architecture. Simply run
+`make'. If you are cross-compiling, you should set the $CC environment variable
+when building to your chosen compiler:
+
+  CC=arm-linux-gnueabihf-gcc make
+
+## Installing
+
+For a default installation, run `make install'. The binary will be placed in
+/usr/sbin. `reboot' and `shutdown' will be placed in /usr/sbin as symlinks to
+the bunny binary. For safety reasons, /sbin/init will not be modified. You will
+need to link bunny to /sbin/init for it to function as your init:
+
+  ln -sf /usr/sbin/bunny /sbin/init
+
+If you are installing to another location, such as an SD card, set the $DESTDIR
+variable:
+
+  make install DESTDIR=/media/rootfs
+
+## Stages
+
+Bunny has 4 main stages:
+  1. Mount filesystems
+  2. Seed /dev/urandom
+  3. Start any login prompts
+  4. Shutdown the system
+
+Stage 1 should perform any mounts that are necessary beyond the basics. By
+default (with the included scripts), bunny will remount /, mount filesystems
+found in /etc/fstab, and enable swapping (if applicable). At this stage, bunny
+mounts /proc, /sys, /run, and /dev, then runs /etc/bunny/1.
+
+Stage 2 is where the bulk of your system's initialization happens: this is where
+devices will be initialized, services started, and so on. After seeding
+/dev/urandom, bunny will then run /etc/bunny/2 and subsequently any executable
+files found in /etc/bunny.d. This is where you should start your services, bring
+up network interfaces, and so on.
+
+Stage 3 will run /etc/bunny/3 which is in charge of starting login prompts on
+any ttys necessary. Edit this file to change this behavior as necessary.
+
+Stage 4 happens when a shutdown or reboot is triggered--this will run
+/etc/bunny/shutdown, sync, and reboot or shutdown.
+
+If anything goes wrong during the boot process, bunny will attempt to run
+a shell (/bin/sh). After the shell exits, bunny will simply reboot the system
+and try again.
+
+## Controlling Bunny
+
+SIGINT and Control-Alt-Delete will trigger a system restart. SIGTERM will shut
+down the system.
+
+If bunny is run as `shutdown' or `reboot', it will perform the respective
+action. By default, `make install' will symlink /usr/sbin/bunny to
+/usr/sbin/reboot and /usr/sbin/shutdown. These will send the relevant signals to
+bunny to reboot the system.
