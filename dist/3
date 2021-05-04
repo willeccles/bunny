@@ -23,8 +23,7 @@
 
 getty="$(command -v getty || command -v agetty)"
 
-if [ -n "$getty" ]; then
+[ -n "$getty" ] &&
   for i in 1 2 3 4 5 6 7 8; do
     "$getty" "115200,38400,9600" "tty$i" linux
   done
-fi

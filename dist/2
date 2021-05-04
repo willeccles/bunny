@@ -23,9 +23,7 @@
 
 # TODO initialize stuff before going down the rabbit hole
 
-if [ -d "/etc/hole" ]; then
+[ -d "/etc/hole" ] &&
   for f in /etc/hole/*; do
-    [ -x "$f" ] && "$f"
+    [ -x "$f" ] && . "$f"
   done
-fi
-

@@ -40,13 +40,6 @@
 
 #define DEFAULT_HOSTNAME "linux"
 
-// - /etc/bunny/1 comes after mounting and should do more mounts
-// - /etc/bunny/2 comes after seeding random and should init devices and run
-//   things found in /etc/bunny.d
-// - /etc/bunny/3 starts login prompts on ttys as necessary
-// - /etc/bunny/shutdown does things that should happen immediately before
-//   shutdown
-
 static void mount_filesystems();
 static void init_hostname();
 static void seed_urandom();
