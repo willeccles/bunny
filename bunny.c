@@ -166,7 +166,7 @@ static void seed_urandom() {
 }
 
 static void shutdown(bool should_reboot) {
-  run("/etc/bunny/shutdown");
+  run("/etc/bunny/zzz");
   sync();
   reboot(should_reboot ? LINUX_REBOOT_CMD_RESTART : LINUX_REBOOT_CMD_POWER_OFF);
 }

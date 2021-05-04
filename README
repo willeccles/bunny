@@ -46,17 +46,16 @@ default (with the included scripts), bunny will remount /, mount filesystems
 found in /etc/fstab, and enable swapping (if applicable). At this stage, bunny
 mounts /proc, /sys, /run, and /dev, then runs /etc/bunny/1.
 
-Stage 2 is where the bulk of your system's initialization happens: this is where
-devices will be initialized, services started, and so on. After seeding
-/dev/urandom, bunny will then run /etc/bunny/2 and subsequently any executable
-files found in /etc/bunny.d. This is where you should start your services, bring
-up network interfaces, and so on.
+Stage 2 is where the bulk of your system's initialization happens. After seeding
+/dev/urandom, bunny will run /etc/bunny/2 and, subsequently, any executable
+files found in /etc/hole. This is where you should start your services, bring up
+network interfaces, and so on.
 
 Stage 3 will run /etc/bunny/3 which is in charge of starting login prompts on
 any ttys necessary. Edit this file to change this behavior as necessary.
 
 Stage 4 happens when a shutdown or reboot is triggered--this will run
-/etc/bunny/shutdown, sync, and reboot or shutdown.
+/etc/bunny/zzz, sync, and reboot or shutdown.
 
 If anything goes wrong during the boot process, bunny will attempt to run
 a shell (/bin/sh). After the shell exits, bunny will simply reboot the system
