@@ -2,8 +2,8 @@
                                 /_//_// // //_/
                                             _/
 
-  Bunny is a minimal and easily-customized Linux init system (PID 1) tailored
-                        towards small/embedded systems.
+       Bunny is a minimal and easily-customized Linux init system (PID 1)
+                    tailored towards small/embedded systems.
 
 
 Building
