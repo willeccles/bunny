@@ -58,10 +58,10 @@ int main(int arc, char** argv) {
 
     if (strncmp(base, "shutdown", 8) == 0) {
       signal_pid1(SIGTERM);
-    } else if (strncmp(base, "restart", 7) == 0) {
+    } else if (strncmp(base, "reboot", 7) == 0) {
       signal_pid1(SIGINT);
     } else {
-      fputs("Must be run as PID 1", stderr);
+      fputs("Must be run as PID 1\n", stderr);
       exit(EXIT_FAILURE);
     }
 
