@@ -8,8 +8,11 @@ CPPFLAGS += -D_XOPEN_SOURCE=700
 
 all: bunny
 
-bunny: bunny.c
+bunny: bunny.c config.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o bunny bunny.c
+
+config.h:
+	cp config.h.in config.h
 
 install: bunny
 	install -m755 bunny $(DESTDIR)/usr/sbin/bunny

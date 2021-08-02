@@ -1,0 +1,22 @@
+#ifndef BUNNY_CONFIG_H
+#define BUNNY_CONFIG_H
+
+/*
+ * [required string]
+ * Default system hostname.
+ */
+#define BUNNY_DEFAULT_HOSTNAME "linux"
+
+/*
+ * [optional]
+ * Mount devfs (disable if you're using static device nodes).
+ */
+#define BUNNY_MOUNT_DEV
+
+/*
+ * [optional]
+ * Seed /dev/urandom.
+ */
+#define BUNNY_SEED_RAND
+
+#endif // BUNNY_CONFIG_H

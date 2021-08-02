@@ -38,11 +38,13 @@
 
 #include <linux/reboot.h>
 
-#define DEFAULT_HOSTNAME "linux"
+#include "config.h"
 
 static void mount_filesystems();
 static void init_hostname();
+#ifdef BUNNY_SEED_RAND
 static void seed_urandom();
+#endif
 static void shutdown(bool should_reboot);
 static void run(const char* path);
 
@@ -77,7 +79,9 @@ int main(int arc, char** argv) {
 
   init_hostname();
 
+#ifdef BUNNY_SEED_RAND
   seed_urandom();
+#endif
 
   // do device/boot things
   run("/etc/bunny/2");
@@ -102,7 +106,9 @@ static void mount_filesystems() {
   mount("proc", "/proc", "proc", MS_NOEXEC | MS_NOSUID | MS_NODEV, NULL);
   mount("sys", "/sys", "sysfs", MS_NOEXEC | MS_NOSUID | MS_NODEV, NULL);
   mount("run", "/run", "tmpfs", MS_NOSUID | MS_NODEV, "mode=0755");
+#ifdef BUNNY_MOUNT_DEV
   mount("dev", "/dev", "devtmpfs", MS_NOSUID, "mode=0755");
+#endif
 }
 
 static void init_hostname() {
@@ -112,14 +118,14 @@ static void init_hostname() {
   int fd = open("/etc/hostname", O_RDONLY);
   if (fd < 0 || fstat(fd, &st) < 0) {
     close(fd);
-    hostname = DEFAULT_HOSTNAME;
+    hostname = BUNNY_DEFAULT_HOSTNAME;
   }
 
   if (hostname == NULL) {
     hostname = mmap(0, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
     if (hostname == MAP_FAILED) {
-      hostname = DEFAULT_HOSTNAME;
+      hostname = BUNNY_DEFAULT_HOSTNAME;
     }
   }
 
@@ -132,6 +138,7 @@ static void init_hostname() {
   munmap(hostname, st.st_size);
 }
 
+#ifdef BUNNY_SEED_RAND
 static void seed_urandom() {
   struct stat st = {0};
   int fd = open("/var/bunny/random-seed", O_RDONLY);
@@ -157,6 +164,7 @@ static void seed_urandom() {
     munmap(data, st.st_size);
   }
 }
+#endif
 
 static void shutdown(bool should_reboot) {
   run("/etc/bunny/zzz");
